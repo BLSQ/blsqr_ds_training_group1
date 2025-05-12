@@ -3,8 +3,8 @@ import requests
 import pandas as pd
 import os
 
-@pipeline("iaso_algeria_data_pipeline", name="IASO Algeria Data Pipeline")
-def iaso_algeria_data_pipeline():
+@pipeline("rita_iaso_exercise", name="Rita IASO Exercise")
+def rita_iaso_exercise():
     current_run.log_info("Pipeline started: Fetching IASO data for Algeria Regions.")
 
     auth_headers = retrieve_iaso_auth_headers()
@@ -12,13 +12,13 @@ def iaso_algeria_data_pipeline():
     regions_df = transform_org_units_to_dataframe(org_units_raw_list)
     
     file_name = "Algeria_Regions.csv"
-    directory_name = "iaso_algeria_data" # Changed directory name to be more generic
+    directory_name = "rita_iaso_exercise" 
     save_path = export_dataframe_to_csv(regions_df, file_name, directory_name)
     
     current_run.log_info(f"Pipeline finished. Data saved to {save_path}")
 
 
-@iaso_algeria_data_pipeline.task
+@rita_iaso_exercise.task
 def retrieve_iaso_auth_headers():
     current_run.log_info("Task started: Getting IASO authentication headers.")
     
@@ -44,10 +44,10 @@ def retrieve_iaso_auth_headers():
     return headers
 
 
-@iaso_algeria_data_pipeline.task
+@rita_iaso_exercise.task
 def fetch_algeria_org_units_data(headers: dict):
     current_run.log_info("Task started: Fetching Algeria organization units data from IASO.")
-    # Kept the endpoint specific as it defines the data being fetched
+    
     endpoint = "https://www.poliooutbreaks.com/api/orgunits/?source_id=2&validation_status=all&orgUnitTypeId=6&orgUnitParentId=29688"
     
     r_data = requests.get(endpoint, headers=headers)
@@ -60,11 +60,10 @@ def fetch_algeria_org_units_data(headers: dict):
     return org_units_list
 
 
-@iaso_algeria_data_pipeline.task
+@rita_iaso_exercise.task
 def transform_org_units_to_dataframe(org_units_list: list):
     current_run.log_info("Task started: Processing organization units data into DataFrame.")
 
-    # Renamed res_df to processed_df for clarity
     processed_df = pd.DataFrame(
         columns=[
             "name", "id", "parent_id", "org_unit_type_id", "org_unit_type_name",
@@ -93,7 +92,7 @@ def transform_org_units_to_dataframe(org_units_list: list):
     return processed_df
 
 
-@iaso_algeria_data_pipeline.task
+@rita_iaso_exercise.task
 def export_dataframe_to_csv(dataframe: pd.DataFrame, file_name: str, directory_name: str):
     current_run.log_info(f"Task started: Saving DataFrame to CSV '{file_name}' in directory '{directory_name}'.")
     
@@ -108,6 +107,6 @@ def export_dataframe_to_csv(dataframe: pd.DataFrame, file_name: str, directory_n
 
 
 if __name__ == "__main__":
-    print("Running IASO Algeria Data Pipeline locally...")
-    iaso_algeria_data_pipeline()
-    print("Local IASO Algeria Data Pipeline run finished.")
+    print("Running Rita IASO Exercise pipeline locally...")
+    rita_iaso_exercise()
+    print("Local run finished.")
