@@ -13,7 +13,8 @@ def dhis2_data_extraction_lionel():
     """
     connection=connect_to_dhis2("dhis2-snis")
     df=retrieve_data_elements(connection)
-    return print(df.head(10))
+    print(df.head())
+    return df.head()
 
 @dhis2_data_extraction_lionel.task
 def connect_to_dhis2(client):
