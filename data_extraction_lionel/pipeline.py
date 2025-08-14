@@ -11,8 +11,8 @@ def dhis2_data_extraction_lionel():
 
     Pipeline functions should only call tasks and should never perform IO operations or expensive computations.
     """
-    connection=connect_to_dhis2("dhis2-snis")
-    df=retrieve_data_elements(connection)
+    connector=connect_to_dhis2("dhis2-snis")
+    df=retrieve_data_elements(connector)
     print(df.head())
     return df.head()
 
