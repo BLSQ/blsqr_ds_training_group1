@@ -1,7 +1,9 @@
-"""Template for newly generated pipelines."""
+"""Import relevant packages."""
+from openhexa.sdk import pipeline, parameter, workspace
+from openhexa.toolbox.dhis2 import DHIS2
+from openhexa.toolbox.dhis2.dataframe import get_data_elements
 
-from openhexa.sdk import current_run, pipeline
-
+import polars as pl
 
 @pipeline("dhis2_data_extraction_lionel")
 def dhis2_data_extraction_lionel():
@@ -9,24 +11,26 @@ def dhis2_data_extraction_lionel():
 
     Pipeline functions should only call tasks and should never perform IO operations or expensive computations.
     """
-    count = task_1()
-    task_2(count)
-    print("Pipeline execution completed - all tasks executed successfully.")
-
-
-@dhis2_data_extraction_lionel.task
-def task_1():
-    """Put some data processing code here."""
-    current_run.log_info("In task 1...")
-
-    return 42
-
+    connection=connect_to_dhis2("dhis2-snis")
+    df=retrieve_data_elements(connection)
+    return print(df.head(10))
 
 @dhis2_data_extraction_lionel.task
-def task_2(count):
-    """Put some data processing code here."""
-    current_run.log_info(f"In task 2... count is {count}")
+def connect_to_dhis2(client):
+    """Set up connection to DHIS2."""
+    connection=workspace.dhis2_connection(client)
+    connection.url
+    dhis2=DHIS2(connection)
+    return dhis2
 
+@dhis2_data_extraction_lionel.task
+def retrieve_data_elements(connection):
+    """Retrieve all data elements relating to mpox, cholera, or covid."""
+    df=get_data_elements(connection)
+    filttered_df=df.filter(
+    pl.col("name").str.contains("(?i)mpox|cholera|covid")
+    )
+    return filttered_df
 
 if __name__ == "__main__":
     dhis2_data_extraction_lionel()
